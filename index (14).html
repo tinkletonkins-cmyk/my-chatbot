@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lona — Ask anything, on any page</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@300;400;500&family=Playfair+Display:ital,wght@1,900&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --black: #0c0c0a;
+  --white: #f2f0e8;
+  --lime: #c8f400;
+  --mono: 'IBM Plex Mono', monospace;
+  --display: 'Bebas Neue', sans-serif;
+  --serif: 'Playfair Display', serif;
+}
+html, body { height: 100%; background: var(--black); color: var(--white); font-family: var(--mono); cursor: none; overflow-x: hidden; }
+*, a { cursor: none; }
+
+#cursor {
+  position: fixed; width: 6px; height: 6px;
+  background: var(--lime); border-radius: 50%;
+  pointer-events: none; z-index: 9999;
+  transform: translate(-50%, -50%);
+  transition: width 0.12s ease, height 0.12s ease;
+  mix-blend-mode: difference;
+}
+#cursor.big { width: 20px; height: 20px; }
+
+/* ── TICKER ── */
+.ticker-wrap { background: var(--lime); overflow: hidden; white-space: nowrap; padding: 10px 0; position: sticky; top: 0; z-index: 100; }
+.ticker-inner {
+  display: inline-block;
+  animation: tick 24s linear infinite;
+  color: var(--black); font-size: 11px; font-weight: 500; letter-spacing: 0.1em;
+}
+.ticker-inner span { margin: 0 36px; }
+@keyframes tick { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+
+/* ── NAV ── */
+nav {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 22px 40px;
+  border-bottom: 1px solid rgba(242,240,232,0.08);
+  position: sticky; top: 34px; z-index: 99; background: var(--black);
+}
+.nav-logo { font-family: var(--display); font-size: 26px; letter-spacing: 4px; }
+.nav-logo span { color: var(--lime); }
+.nav-right { display: flex; align-items: center; gap: 28px; }
+.nav-link { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(242,240,232,0.35); text-decoration: none; transition: color 0.2s; }
+.nav-link:hover { color: var(--white); }
+.nav-cta {
+  background: var(--lime); color: var(--black);
+  border: none; padding: 10px 22px;
+  font-family: var(--mono); font-size: 11px; font-weight: 500;
+  letter-spacing: 0.1em; text-transform: uppercase; cursor: none;
+  transition: background 0.15s;
+}
+.nav-cta:hover { background: var(--white); }
+
+/* ── HERO ── */
+.hero {
+  display: grid; grid-template-columns: 1fr 1fr;
+  min-height: calc(100vh - 34px - 56px);
+  border-bottom: 1px solid rgba(242,240,232,0.08);
+}
+.hero-left {
+  padding: 56px 40px;
+  border-right: 1px solid rgba(242,240,232,0.08);
+  display: flex; flex-direction: column; justify-content: space-between;
+}
+.hero-tag { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--lime); margin-bottom: 28px; }
+.hero-h1 { font-family: var(--display); font-size: clamp(72px, 9vw, 138px); line-height: 0.92; letter-spacing: 1px; }
+.hero-h1 em { font-family: var(--serif); font-style: italic; color: var(--lime); font-size: 0.78em; display: block; line-height: 1.05; }
+.hero-bottom { display: flex; align-items: flex-end; justify-content: space-between; margin-top: 44px; gap: 24px; }
+.hero-desc { font-size: 12px; color: rgba(242,240,232,0.4); line-height: 1.85; max-width: 260px; }
+.dl-btn {
+  background: var(--lime); border: none; color: var(--black);
+  font-family: var(--display); font-size: 16px; letter-spacing: 2px;
+  padding: 14px 30px; cursor: none; white-space: nowrap; flex-shrink: 0;
+  transition: background 0.15s, transform 0.1s;
+  display: flex; align-items: center; gap: 10px;
+}
+.dl-btn:hover { background: var(--white); transform: scale(1.02); }
+.dl-btn svg { width: 16px; height: 16px; }
+
+/* ── BROWSER MOCKUP ── */
+.hero-right {
+  padding: 48px 40px; display: flex; flex-direction: column; justify-content: center;
+  align-items: center; position: relative; overflow: hidden; gap: 0;
+}
+.browser-mockup {
+  width: 100%; max-width: 460px;
+  border: 1px solid rgba(242,240,232,0.1);
+  border-radius: 8px; overflow: hidden;
+  box-shadow: 0 32px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(242,240,232,0.05);
+  position: relative; z-index: 2;
+  animation: floatUp 3.5s ease-in-out infinite alternate;
+}
+@keyframes floatUp {
+  from { transform: translateY(0px); }
+  to   { transform: translateY(-10px); }
+}
+.browser-bar {
+  background: #1a1a18; padding: 10px 14px;
+  display: flex; align-items: center; gap: 10px;
+  border-bottom: 1px solid rgba(242,240,232,0.07);
+}
+.browser-dots { display: flex; gap: 5px; }
+.browser-dot { width: 8px; height: 8px; border-radius: 50%; }
+.browser-dot:nth-child(1) { background: #ff5f57; }
+.browser-dot:nth-child(2) { background: #ffbd2e; }
+.browser-dot:nth-child(3) { background: #28c840; }
+.browser-url {
+  flex: 1; background: rgba(242,240,232,0.05); border-radius: 4px;
+  padding: 4px 10px; font-size: 10px; color: rgba(242,240,232,0.3);
+  letter-spacing: 0.05em;
+}
+.browser-body {
+  display: flex; height: 300px; background: #111110;
+}
+.browser-page {
+  flex: 1; padding: 20px; overflow: hidden;
+}
+.page-skeleton { display: flex; flex-direction: column; gap: 8px; }
+.skel { background: rgba(242,240,232,0.06); border-radius: 2px; height: 10px; }
+.skel.w100 { width: 100%; }
+.skel.w80 { width: 80%; }
+.skel.w60 { width: 60%; }
+.skel.w90 { width: 90%; }
+.skel.w40 { width: 40%; }
+.skel.h20 { height: 20px; margin-bottom: 6px; }
+.skel.img { height: 80px; width: 100%; margin: 8px 0; background: rgba(242,240,232,0.04); }
+
+/* ── LONA SIDEBAR ── */
+.lona-sidebar {
+  width: 180px; flex-shrink: 0;
+  border-left: 1px solid rgba(200,244,0,0.2);
+  background: rgba(12,12,10,0.98);
+  display: flex; flex-direction: column;
+  position: relative; overflow: hidden;
+}
+.lona-sidebar::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: var(--lime);
+}
+.sidebar-hdr {
+  padding: 10px 12px 8px;
+  border-bottom: 1px solid rgba(242,240,232,0.07);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.sidebar-logo { font-family: var(--display); font-size: 13px; letter-spacing: 2px; color: var(--lime); }
+.sidebar-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--lime); animation: blink 2s ease-in-out infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.25} }
+
+.sidebar-msgs { flex: 1; padding: 10px 10px; display: flex; flex-direction: column; gap: 8px; overflow: hidden; }
+.sb-msg {
+  font-size: 9px; line-height: 1.6; letter-spacing: 0.02em;
+}
+.sb-msg.user {
+  background: rgba(242,240,232,0.06);
+  border: 1px solid rgba(242,240,232,0.08);
+  border-radius: 8px 8px 2px 8px;
+  padding: 5px 8px;
+  color: rgba(242,240,232,0.6);
+  align-self: flex-end; max-width: 90%;
+}
+.sb-msg.bot {
+  color: rgba(242,240,232,0.75);
+  padding: 2px 0;
+}
+.sb-msg.bot strong { color: var(--lime); font-weight: 500; }
+.sb-icon { font-size: 8px; color: var(--lime); margin-bottom: 2px; }
+
+.sidebar-inp {
+  padding: 8px 10px;
+  border-top: 1px solid rgba(242,240,232,0.07);
+}
+.sb-field {
+  background: rgba(242,240,232,0.04);
+  border: 1px solid rgba(242,240,232,0.1);
+  border-radius: 3px; padding: 5px 8px;
+  font-size: 9px; color: rgba(242,240,232,0.3);
+  letter-spacing: 0.05em; display: flex; align-items: center; justify-content: space-between;
+}
+.sb-send { color: var(--lime); font-size: 10px; }
+
+/* Typing animation in sidebar */
+.typing-dots { display: flex; gap: 3px; padding: 4px 0; }
+.typing-dot { width: 3px; height: 3px; border-radius: 50%; background: var(--lime); animation: tdb 1s ease infinite; }
+.typing-dot:nth-child(2){animation-delay:.15s} .typing-dot:nth-child(3){animation-delay:.3s}
+@keyframes tdb { 0%,60%,100%{opacity:0.2;transform:scale(1)} 30%{opacity:1;transform:scale(1.35)} }
+
+/* Glow behind mockup */
+.hero-glow {
+  position: absolute;
+  width: 300px; height: 300px;
+  background: radial-gradient(circle, rgba(200,244,0,0.08) 0%, transparent 70%);
+  top: 50%; left: 50%; transform: translate(-50%, -50%);
+  pointer-events: none; z-index: 1;
+}
+
+/* ── FEATURE STRIP ── */
+.strip { display: grid; grid-template-columns: repeat(4,1fr); border-bottom: 1px solid rgba(242,240,232,0.08); }
+.strip-item { padding: 32px 28px; border-right: 1px solid rgba(242,240,232,0.08); transition: background 0.2s; }
+.strip-item:last-child { border-right: none; }
+.strip-item:hover { background: rgba(242,240,232,0.02); }
+.strip-n { font-size: 10px; color: var(--lime); letter-spacing: 0.15em; margin-bottom: 14px; }
+.strip-t { font-family: var(--display); font-size: 20px; letter-spacing: 1px; margin-bottom: 8px; }
+.strip-b { font-size: 11px; color: rgba(242,240,232,0.35); line-height: 1.75; }
+
+/* ── HOW IT WORKS ── */
+.how {
+  display: grid; grid-template-columns: 1fr 1fr;
+  border-bottom: 1px solid rgba(242,240,232,0.08);
+}
+.how-left {
+  padding: 72px 40px;
+  border-right: 1px solid rgba(242,240,232,0.08);
+  display: flex; flex-direction: column; justify-content: center;
+}
+.how-tag { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--lime); margin-bottom: 20px; }
+.how-h2 { font-family: var(--display); font-size: clamp(42px, 5vw, 72px); line-height: 0.95; letter-spacing: 1px; margin-bottom: 40px; }
+.how-h2 em { font-family: var(--serif); font-style: italic; color: var(--lime); }
+.steps { display: flex; flex-direction: column; gap: 0; }
+.step {
+  display: flex; gap: 20px; align-items: flex-start;
+  padding: 22px 0; border-bottom: 1px solid rgba(242,240,232,0.07);
+  transition: padding-left 0.2s;
+}
+.step:last-child { border-bottom: none; }
+.step:hover { padding-left: 8px; }
+.step-num { font-family: var(--display); font-size: 32px; color: var(--lime); line-height: 1; flex-shrink: 0; width: 40px; }
+.step-body {}
+.step-title { font-family: var(--display); font-size: 18px; letter-spacing: 1px; margin-bottom: 6px; }
+.step-desc { font-size: 11px; color: rgba(242,240,232,0.35); line-height: 1.75; }
+
+.how-right {
+  padding: 72px 40px; display: flex; align-items: center; justify-content: center;
+  position: relative; overflow: hidden;
+}
+.how-bg-text {
+  font-family: var(--display);
+  font-size: clamp(140px, 20vw, 260px);
+  color: rgba(242,240,232,0.025);
+  position: absolute; bottom: -10px; right: -20px;
+  line-height: 1; user-select: none; pointer-events: none; letter-spacing: -2px;
+}
+
+/* big chat preview */
+.chat-preview {
+  width: 100%; max-width: 320px;
+  border: 1px solid rgba(242,240,232,0.1);
+  background: #0e0e0c;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+}
+.cp-hdr {
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(242,240,232,0.07);
+  display: flex; align-items: center; gap: 8px;
+  font-family: var(--display); font-size: 14px; letter-spacing: 2px;
+}
+.cp-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--lime); animation: blink 2s ease-in-out infinite; }
+.cp-msgs { padding: 18px 16px; display: flex; flex-direction: column; gap: 12px; }
+.cp-user {
+  align-self: flex-end;
+  background: rgba(242,240,232,0.07);
+  border: 1px solid rgba(242,240,232,0.09);
+  border-radius: 14px 14px 3px 14px;
+  padding: 8px 12px; font-size: 11px;
+  color: rgba(242,240,232,0.65); max-width: 80%;
+}
+.cp-bot { display: flex; gap: 8px; align-items: flex-start; }
+.cp-icon { color: var(--lime); font-size: 12px; flex-shrink: 0; margin-top: 1px; }
+.cp-text { font-size: 11px; color: rgba(242,240,232,0.75); line-height: 1.7; }
+.cp-text strong { color: var(--lime); font-weight: 500; }
+.cp-inp {
+  padding: 10px 16px;
+  border-top: 1px solid rgba(242,240,232,0.07);
+  display: flex; gap: 8px; align-items: center;
+}
+.cp-field {
+  flex: 1; background: rgba(242,240,232,0.04);
+  border: 1px solid rgba(200,244,0,0.2);
+  font-size: 10px; color: rgba(242,240,232,0.25); letter-spacing: 0.05em;
+  padding: 6px 10px;
+}
+.cp-send {
+  background: var(--lime); color: var(--black);
+  font-family: var(--display); font-size: 11px; letter-spacing: 1px;
+  padding: 6px 12px; border: none; cursor: none;
+}
+
+/* ── STATS ROW ── */
+.stats-row {
+  display: grid; grid-template-columns: repeat(4,1fr);
+  border-bottom: 1px solid rgba(242,240,232,0.08);
+  background: rgba(200,244,0,0.02);
+}
+.stat-cell { padding: 40px 32px; border-right: 1px solid rgba(242,240,232,0.08); }
+.stat-cell:last-child { border-right: none; }
+.stat-num { font-family: var(--display); font-size: 52px; color: var(--lime); line-height: 1; margin-bottom: 6px; }
+.stat-label { font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(242,240,232,0.3); }
+
+/* ── BIG CTA ── */
+.big-cta {
+  padding: 96px 40px; display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid rgba(242,240,232,0.08); gap: 40px;
+}
+.big-cta-text { font-family: var(--display); font-size: clamp(40px, 5.5vw, 78px); line-height: 0.95; letter-spacing: 1px; }
+.big-cta-text em { font-family: var(--serif); font-style: italic; color: var(--lime); }
+.big-cta-right { display: flex; flex-direction: column; align-items: flex-end; gap: 14px; flex-shrink: 0; }
+.big-btn {
+  background: var(--lime); color: var(--black); border: none;
+  font-family: var(--display); font-size: 22px; letter-spacing: 2px;
+  padding: 22px 52px; cursor: none;
+  transition: background 0.15s, transform 0.1s;
+  display: flex; align-items: center; gap: 12px;
+}
+.big-btn:hover { background: var(--white); transform: scale(1.02); }
+.big-sub { font-size: 10px; color: rgba(242,240,232,0.2); letter-spacing: 0.1em; }
+
+/* ── FOOTER ── */
+footer {
+  padding: 28px 40px; display: flex; align-items: center; justify-content: space-between;
+}
+.footer-logo { font-family: var(--display); font-size: 18px; letter-spacing: 3px; opacity: 0.2; }
+.footer-links { display: flex; gap: 24px; }
+.footer-link { font-size: 10px; color: rgba(242,240,232,0.2); letter-spacing: 0.1em; text-decoration: none; transition: color 0.2s; }
+.footer-link:hover { color: rgba(242,240,232,0.5); }
+.footer-copy { font-size: 10px; color: rgba(242,240,232,0.15); letter-spacing: 0.1em; }
+
+/* ── SCROLL REVEAL ── */
+.reveal {
+  opacity: 1; transform: translateY(0);
+  transition: opacity 0.6s cubic-bezier(0.22,1,0.36,1), transform 0.6s cubic-bezier(0.22,1,0.36,1);
+}
+.reveal.visible { opacity: 1; transform: translateY(0); }
+
+/* ── ANIMATED SIDEBAR CHAT ── */
+@keyframes fadeMsg { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+.sb-msg { opacity: 0; }
+.sb-msg.show { animation: fadeMsg 0.4s cubic-bezier(0.22,1,0.36,1) forwards; }
+
+@media(max-width:900px) {
+  .hero { grid-template-columns: 1fr; }
+  .hero-right { display: none; }
+  .strip { grid-template-columns: 1fr 1fr; }
+  .how { grid-template-columns: 1fr; }
+  .how-right { display: none; }
+  .stats-row { grid-template-columns: 1fr 1fr; }
+  .big-cta { flex-direction: column; align-items: flex-start; }
+  nav, .hero-left, .big-cta, footer, .how-left { padding-left: 20px; padding-right: 20px; }
+  .strip-item { padding: 24px 18px; }
+}
+
+html { scroll-behavior: smooth; }
+.section-anchor { scroll-margin-top: 90px; }
+.page-section {
+  border-bottom: 1px solid rgba(242,240,232,0.08);
+  padding: 80px 40px;
+}
+.section-tag { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--lime); margin-bottom: 20px; }
+.section-h2 { font-family: var(--display); font-size: clamp(42px,5vw,72px); line-height: 0.95; letter-spacing: 1px; margin-bottom: 40px; }
+.section-h2 em { font-family: var(--serif); font-style: italic; color: var(--lime); }
+.features-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1px; background: rgba(242,240,232,0.07); }
+.feat-cell { background: var(--black); padding: 32px 28px; transition: background 0.2s; }
+.feat-cell:hover { background: rgba(242,240,232,0.02); }
+.feat-num { font-size: 10px; color: var(--lime); letter-spacing: 0.15em; margin-bottom: 14px; }
+.feat-title { font-family: var(--display); font-size: 22px; letter-spacing: 1px; margin-bottom: 10px; }
+.feat-body { font-size: 11px; color: rgba(242,240,232,0.35); line-height: 1.8; }
+.privacy-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+.privacy-card { border: 1px solid rgba(242,240,232,0.08); padding: 32px; transition: border-color 0.2s; }
+.privacy-card:hover { border-color: rgba(200,244,0,0.2); }
+.privacy-icon { font-size: 22px; margin-bottom: 16px; color: var(--lime); }
+.privacy-title { font-family: var(--display); font-size: 20px; letter-spacing: 1px; margin-bottom: 10px; }
+.privacy-body { font-size: 11px; color: rgba(242,240,232,0.35); line-height: 1.8; }
+.about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+.about-text p { font-size: 12px; color: rgba(242,240,232,0.5); line-height: 1.9; margin-bottom: 16px; }
+.about-text p:last-child { margin-bottom: 0; }
+.about-stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: rgba(242,240,232,0.07); }
+.about-stat { background: var(--black); padding: 28px 24px; }
+.about-stat-num { font-family: var(--display); font-size: 44px; color: var(--lime); line-height: 1; margin-bottom: 4px; }
+.about-stat-label { font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(242,240,232,0.3); }
+@media(max-width:900px){
+  .features-grid { grid-template-columns: 1fr 1fr; }
+  .privacy-grid { grid-template-columns: 1fr; }
+  .about-grid { grid-template-columns: 1fr; }
+  .page-section { padding: 60px 20px; }
+}
+
+
+html { scroll-behavior: smooth; }
+.section-anchor { scroll-margin-top: 90px; }
+
+/* ── CHAT UI ── */
+#chatView {
+  position: fixed; inset: 0; z-index: 500;
+  display: flex; flex-direction: column;
+  background: var(--black);
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.35s ease;
+}
+#chatView.in { opacity: 1; pointer-events: all; }
+
+.chat-hdr {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 28px; height: 54px;
+  border-bottom: 1px solid rgba(242,240,232,0.08);
+  flex-shrink: 0;
+}
+.chat-hdr-logo { font-family: var(--display); font-size: 20px; letter-spacing: 2px; display: flex; align-items: center; gap: 9px; }
+.chat-live { width: 7px; height: 7px; border-radius: 50%; background: var(--lime); animation: blink 2s ease-in-out infinite; }
+.hdr-acts { display: flex; gap: 8px; }
+.hbtn {
+  background: transparent; border: 1px solid rgba(242,240,232,0.12);
+  color: rgba(242,240,232,0.4); font-family: var(--mono);
+  font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 6px 13px; cursor: pointer; transition: all 0.15s;
+}
+.hbtn:hover { border-color: var(--white); color: var(--white); }
+
+#chatMsgs {
+  flex: 1; overflow-y: auto; padding: 36px 0;
+  display: flex; flex-direction: column; align-items: center;
+  scrollbar-width: none;
+}
+#chatMsgs::-webkit-scrollbar { display: none; }
+
+.chat-welcome { text-align: center; padding: 56px 24px; width: 100%; max-width: 760px; }
+.chat-welcome h2 { font-family: var(--display); font-size: clamp(44px,7vw,88px); letter-spacing: 2px; line-height: 0.95; margin-bottom: 14px; }
+.chat-welcome h2 em { font-family: var(--serif); font-style: italic; color: var(--lime); }
+.chat-welcome p { font-size: 11px; color: rgba(242,240,232,0.3); letter-spacing: 0.1em; margin-bottom: 32px; }
+.chat-sugs { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.chat-sug {
+  background: transparent; border: 1px solid rgba(242,240,232,0.12);
+  color: rgba(242,240,232,0.4); font-family: var(--mono);
+  font-size: 11px; padding: 8px 15px; cursor: pointer; letter-spacing: 0.04em;
+  transition: all 0.15s;
+}
+.chat-sug:hover { border-color: var(--lime); color: var(--lime); }
+
+.cmwrap {
+  padding: 18px 0; display: flex; gap: 18px; align-items: flex-start;
+  width: 100%; max-width: 760px;
+  opacity: 0; animation: msgIn 0.4s cubic-bezier(0.22,1,0.36,1) forwards;
+}
+@keyframes msgIn { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+.cmwrap.user { flex-direction: row-reverse; }
+.cmwrap.user .cmtext {
+  background: rgba(242,240,232,0.07); border: 1px solid rgba(242,240,232,0.1);
+  border-radius: 18px 18px 4px 18px; padding: 11px 16px;
+  color: rgba(242,240,232,0.75); display: inline-block; max-width: 520px;
+}
+.cmwrap.user .cmicon { display: none; }
+.cmicon { color: var(--lime); font-size: 16px; flex-shrink: 0; margin-top: 2px; }
+.cmtext { font-size: 14px; line-height: 1.8; color: var(--white); word-break: break-word; flex: 1; }
+.cmtext p { margin-bottom: 0.75em; } .cmtext p:last-child { margin-bottom: 0; }
+.cmtext h1,.cmtext h2,.cmtext h3 { font-family: var(--mono); letter-spacing: 0; margin: 1em 0 0.4em; line-height: 1.3; font-weight: 500; }
+.cmtext h1{font-size:22px}.cmtext h2{font-size:18px}.cmtext h3{font-size:15px}
+.cmtext ul,.cmtext ol { padding-left: 1.4em; margin: 0.5em 0; }
+.cmtext li { margin-bottom: 0.3em; }
+.cmtext code { font-family: var(--mono) !important; font-size: 12px; background: rgba(200,244,0,0.08); border: 1px solid rgba(200,244,0,0.18); color: var(--lime); padding: 1px 5px; }
+.cmtext pre { background: rgba(242,240,232,0.04); border: 1px solid rgba(242,240,232,0.1); border-left: 2px solid var(--lime); padding: 14px 16px; margin: 0.75em 0; overflow-x: auto; }
+.cmtext pre code { background: none; border: none; color: var(--white); padding: 0; font-size: 12.5px; font-family: var(--mono) !important; }
+.cmtext strong { color: var(--white); font-weight: 500; }
+.cmtext a { color: var(--lime); text-decoration: underline; }
+.cmtext blockquote { border-left: 2px solid var(--lime); margin: 0.75em 0; padding: 6px 14px; color: rgba(242,240,232,0.5); }
+.cmtext table { border-collapse: collapse; width: 100%; margin: 0.75em 0; font-size: 13px; font-family: var(--mono); }
+.cmtext th { background: rgba(200,244,0,0.08); color: var(--lime); padding: 10px 14px; border: 1px solid rgba(242,240,232,0.1); text-align: left; font-size: 12px; font-weight: 500; letter-spacing: 0.02em; text-transform: none; }
+.cmtext td { padding: 9px 14px; border: 1px solid rgba(242,240,232,0.08); color: rgba(242,240,232,0.85); font-size: 13px; line-height: 1.5; }
+.cmtext tr:nth-child(even) td { background: rgba(242,240,232,0.02); }
+
+.tdots { display: flex; gap: 5px; padding: 4px 0; }
+.td { width: 5px; height: 5px; border-radius: 50%; background: var(--lime); animation: tdb 1s ease infinite; }
+.td:nth-child(2){animation-delay:.15s}.td:nth-child(3){animation-delay:.3s}
+@keyframes tdb { 0%,60%,100%{opacity:0.2;transform:scale(1)} 30%{opacity:1;transform:scale(1.35)} }
+
+.chat-izone {
+  border-top: 1px solid rgba(242,240,232,0.08);
+  padding: 16px 36px 20px; flex-shrink: 0;
+  display: flex; flex-direction: column; align-items: center;
+}
+.chat-izone > * { width: 100%; max-width: 760px; }
+.chat-irow {
+  display: flex; align-items: flex-end;
+  border: 1px solid rgba(242,240,232,0.15); transition: border-color 0.2s;
+}
+.chat-irow:focus-within { border-color: var(--lime); }
+#chatInp {
+  flex: 1; background: transparent; border: none; outline: none;
+  color: var(--white); font-family: var(--mono); font-size: 13px;
+  padding: 12px 16px; resize: none; max-height: 120px; line-height: 1.6;
+}
+#chatInp::placeholder { color: rgba(242,240,232,0.18); }
+#chatSbtn {
+  background: var(--lime); border: none; color: var(--black);
+  font-family: var(--display); font-size: 14px; letter-spacing: 1px;
+  padding: 0 22px; height: 48px; cursor: pointer; flex-shrink: 0;
+  transition: background 0.15s;
+}
+#chatSbtn:hover { background: var(--white); }
+#chatSbtn:disabled { background: rgba(200,244,0,0.2); color: rgba(0,0,0,0.35); }
+.chat-ihint { font-size: 10px; color: rgba(242,240,232,0.15); letter-spacing: 0.07em; margin-top: 8px; }
+
+/* ── FAQ ── */
+.faq-item { border-bottom: 1px solid rgba(242,240,232,0.08); }
+.faq-q {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 20px 0; cursor: pointer; font-size: 13px; letter-spacing: 0.04em;
+  color: rgba(242,240,232,0.7); transition: color 0.2s;
+}
+.faq-q:hover { color: var(--white); }
+.faq-q.open { color: var(--lime); }
+.faq-arrow { font-size: 16px; transition: transform 0.25s; color: var(--lime); }
+.faq-q.open .faq-arrow { transform: rotate(180deg); }
+.faq-a {
+  font-size: 12px; color: rgba(242,240,232,0.4); line-height: 1.85;
+  max-height: 0; overflow: hidden;
+  transition: max-height 0.35s ease, padding-bottom 0.3s ease;
+  padding-bottom: 0;
+}
+.faq-a.open { max-height: 200px; padding-bottom: 20px; }
+
+/* KaTeX dark theme */
+.katex { color: var(--white); font-size: 1.05em; }
+.cmtext td .katex, .cmtext th .katex { font-size: 0.95em; }
+.katex-display { overflow-x: auto; padding: 12px 0; }
+.katex-display > .katex { color: var(--lime); }
+
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<body>
+
+<div id="cursor"></div>
+
+<!-- TICKER -->
+<div class="ticker-wrap">
+  <div class="ticker-inner">
+    <span>LONA AI</span><span>·</span><span>ASK ANYTHING</span><span>·</span><span>ASK ANYTHING</span><span>·</span><span>AI ASSISTANT</span><span>·</span><span>FREE TO USE</span><span>·</span><span>THINK WITHOUT SWITCHING TABS</span><span>·</span>
+    <span>LONA AI</span><span>·</span><span>ASK ANYTHING</span><span>·</span><span>ASK ANYTHING</span><span>·</span><span>AI ASSISTANT</span><span>·</span><span>FREE TO USE</span><span>·</span><span>THINK WITHOUT SWITCHING TABS</span><span>·</span>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">LON<span>A</span></div>
+  <div class="nav-right">
+    <a class="nav-link" href="#features" onclick="smoothTo('features')">Features</a>
+    <a class="nav-link" href="#privacy" onclick="smoothTo('privacy')">Privacy</a>
+    <a class="nav-link" href="#about" onclick="smoothTo('about')">About</a>
+    <a class="nav-link" href="#faq" onclick="smoothTo('faq')">FAQ</a>
+    <button class="nav-cta" onclick="openChat()">Try Lona →</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-left">
+    <div>
+      <div class="hero-tag">// Your AI assistant, inside Chrome</div>
+      <div class="hero-h1">
+        CHAT<br>
+        <em>freely.</em><br>
+        ASK<br>ANYTHING.
+      </div>
+    </div>
+    <div class="hero-bottom">
+      <p class="hero-desc">Lona is your AI assistant built into Chrome. Chat, research, summarize, write — all without leaving your browser.</p>
+      <button class="dl-btn" onclick="openChat()">START CHATTING ↗</button>
+    </div>
+  </div>
+  <div class="hero-right">
+    <div class="hero-glow"></div>
+    <div class="browser-mockup">
+      <div class="browser-bar">
+        <div class="browser-dots">
+          <div class="browser-dot"></div>
+          <div class="browser-dot"></div>
+          <div class="browser-dot"></div>
+        </div>
+        <div class="browser-url">en.wikipedia.org/wiki/Black_hole</div>
+      </div>
+      <div class="browser-body">
+        <!-- fake page -->
+        <div class="browser-page">
+          <div class="page-skeleton">
+            <div class="skel w80 h20"></div>
+            <div class="skel w100"></div>
+            <div class="skel w90"></div>
+            <div class="skel w60"></div>
+            <div class="skel img"></div>
+            <div class="skel w100"></div>
+            <div class="skel w80"></div>
+            <div class="skel w90"></div>
+            <div class="skel w40"></div>
+            <div class="skel w100"></div>
+            <div class="skel w70"></div>
+          </div>
+        </div>
+        <!-- lona sidebar -->
+        <div class="lona-sidebar">
+          <div class="sidebar-hdr">
+            <div class="sidebar-logo">LONA</div>
+            <div class="sidebar-dot"></div>
+          </div>
+          <div class="sidebar-msgs" id="sidebarMsgs">
+            <!-- messages injected by JS -->
+          </div>
+          <div class="sidebar-inp">
+            <div class="sb-field">
+              <span>Ask about this page...</span>
+              <span class="sb-send">↑</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURE STRIP -->
+<div class="strip reveal">
+  <div class="strip-item"><div class="strip-n">01 /</div><div class="strip-t">CHAT</div><p class="strip-b">Ask anything, get real answers instantly. No switching tabs, no copy-pasting.</p></div>
+  <div class="strip-item"><div class="strip-n">02 /</div><div class="strip-t">RESEARCH</div><p class="strip-b">Lona searches the web automatically when your question needs live info.</p></div>
+  <div class="strip-item"><div class="strip-n">03 /</div><div class="strip-t">INSTANT</div><p class="strip-b">Real answers in seconds. Not summaries of summaries.</p></div>
+  <div class="strip-item"><div class="strip-n">04 /</div><div class="strip-t">PRIVATE</div><p class="strip-b">Your conversations stay on your device. Zero data sold.</p></div>
+</div>
+
+<!-- HOW IT WORKS -->
+<section class="how">
+  <div class="how-left reveal">
+    <div class="how-tag">// How it works</div>
+    <div class="how-h2">Simple as<br><em>it gets.</em></div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <div class="step-title">OPEN LONA</div>
+          <p class="step-desc">Go to the site. No install, no account, no credit card. Just open and go.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <div class="step-title">ASK ANYTHING</div>
+          <p class="step-desc">Type whatever's on your mind — questions, ideas, code, essays, math. Lona handles it.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <div class="step-title">GET REAL ANSWERS</div>
+          <p class="step-desc">No fluff, no filler. Fast, direct responses that actually help.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="how-right reveal">
+    <div class="how-bg-text">02</div>
+    <div class="chat-preview">
+      <div class="cp-hdr"><div class="cp-dot"></div>LONA</div>
+      <div class="cp-msgs">
+        <div class="cp-user">explain black holes simply</div>
+        <div class="cp-bot">
+          <div class="cp-icon">✦</div>
+          <div class="cp-text">A black hole is a region of space where gravity is so strong that <strong>nothing can escape</strong> — not even light. They form when massive stars collapse.</div>
+        </div>
+        <div class="cp-user">how massive are we talking</div>
+        <div class="cp-bot">
+          <div class="cp-icon">✦</div>
+          <div class="cp-text">The one at the center of our galaxy is <strong>4 million times</strong> the mass of our sun. Some are billions. It's genuinely absurd.</div>
+        </div>
+      </div>
+      <div class="cp-inp">
+        <div class="cp-field">Ask Lona...</div>
+        <div class="cp-send">GO</div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- STATS -->
+<div class="stats-row reveal">
+  <div class="stat-cell"><div class="stat-num">0</div><div class="stat-label">Tabs opened to answer a question</div></div>
+  <div class="stat-cell"><div class="stat-num">&lt;1s</div><div class="stat-label">Average response time</div></div>
+  <div class="stat-cell"><div class="stat-num">∞</div><div class="stat-label">Pages Lona can read</div></div>
+  <div class="stat-cell"><div class="stat-num">$0</div><div class="stat-label">To get started</div></div>
+</div>
+
+<!-- FEATURES -->
+<section id="features" class="section-anchor reveal" style="border-bottom:1px solid rgba(242,240,232,0.08); padding: 80px 40px;">
+  <div class="section-tag">// What Lona can do</div>
+  <div class="section-h2" style="font-family:var(--display);font-size:clamp(42px,5vw,72px);line-height:0.95;letter-spacing:1px;margin-bottom:40px;">Built to <em style="font-family:var(--serif);font-style:italic;color:var(--lime)">think</em><br>with you.</div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(242,240,232,0.07);">
+    <div class="feat-cell">
+      <div class="feat-num">01 /</div>
+      <div class="feat-title">CHAT NATURALLY</div>
+      <p class="feat-body">Talk to Lona like a person. Ask follow-ups, change direction, go deep. It keeps up.</p>
+    </div>
+    <div class="feat-cell">
+      <div class="feat-num">02 /</div>
+      <div class="feat-title">WRITE ANYTHING</div>
+      <p class="feat-body">Essays, emails, cover letters, social posts, code comments. Lona writes it fast and well.</p>
+    </div>
+    <div class="feat-cell">
+      <div class="feat-num">03 /</div>
+      <div class="feat-title">DEBUG CODE</div>
+      <p class="feat-body">Paste your code, describe the bug. Lona finds it, explains it, fixes it.</p>
+    </div>
+    <div class="feat-cell">
+      <div class="feat-num">04 /</div>
+      <div class="feat-title">SOLVE MATH</div>
+      <p class="feat-body">From algebra to calculus. Full LaTeX rendering so every equation looks clean.</p>
+    </div>
+    <div class="feat-cell">
+      <div class="feat-num">05 /</div>
+      <div class="feat-title">BRAINSTORM IDEAS</div>
+      <p class="feat-body">Stuck? Lona throws out angles you hadn't considered. It's a thinking partner, not a search bar.</p>
+    </div>
+    <div class="feat-cell">
+      <div class="feat-num">06 /</div>
+      <div class="feat-title">EXPLAIN ANYTHING</div>
+      <p class="feat-body">Complex topics broken down simply. Or go deep — Lona adjusts to how you think.</p>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how" class="section-anchor reveal" style="border-bottom:1px solid rgba(242,240,232,0.08); padding: 80px 40px;">
+  <div class="section-tag">// How it works</div>
+  <div class="section-h2" style="font-family:var(--display);font-size:clamp(42px,5vw,72px);line-height:0.95;letter-spacing:1px;margin-bottom:48px;">Simple as<br><em style="font-family:var(--serif);font-style:italic;color:var(--lime)">it gets.</em></div>
+  <div style="display:flex;flex-direction:column;max-width:640px;">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <div class="step-title">OPEN LONA</div>
+        <p class="step-desc">No install. No account. No credit card. Just open the site and go.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <div class="step-title">TYPE ANYTHING</div>
+        <p class="step-desc">Questions, code, math, essays, ideas — whatever's on your mind. Lona handles all of it.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <div class="step-title">GET REAL ANSWERS</div>
+        <p class="step-desc">No fluff. No filler. Fast, direct responses that actually help you move forward.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRIVACY -->
+<section id="privacy" class="section-anchor reveal" style="border-bottom:1px solid rgba(242,240,232,0.08); padding: 80px 40px;">
+  <div class="section-tag">// Privacy</div>
+  <div class="section-h2" style="font-family:var(--display);font-size:clamp(42px,5vw,72px);line-height:0.95;letter-spacing:1px;margin-bottom:40px;">Your data stays<br><em style="font-family:var(--serif);font-style:italic;color:var(--lime)">yours.</em></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:32px;">
+    <div class="privacy-card">
+      <div class="privacy-icon">⬡</div>
+      <div class="privacy-title">NO ACCOUNTS</div>
+      <p class="privacy-body">Lona doesn't ask who you are. No sign-up, no email, no profile. You're anonymous by default.</p>
+    </div>
+    <div class="privacy-card">
+      <div class="privacy-icon">⬡</div>
+      <div class="privacy-title">NO DATA SOLD</div>
+      <p class="privacy-body">Your conversations are never sold to advertisers or third parties. Period.</p>
+    </div>
+    <div class="privacy-card">
+      <div class="privacy-icon">⬡</div>
+      <div class="privacy-title">NO TRACKING</div>
+      <p class="privacy-body">No cookies that follow you around. No fingerprinting. Lona doesn't care where you've been.</p>
+    </div>
+    <div class="privacy-card">
+      <div class="privacy-icon">⬡</div>
+      <div class="privacy-title">SESSION ONLY</div>
+      <p class="privacy-body">Conversations exist only while your tab is open. Close it and they're gone. Clean slate every time.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about" class="section-anchor reveal" style="border-bottom:1px solid rgba(242,240,232,0.08); padding: 80px 40px;">
+  <div class="section-tag">// About</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:start;">
+    <div>
+      <div class="section-h2" style="font-family:var(--display);font-size:clamp(42px,5vw,72px);line-height:0.95;letter-spacing:1px;margin-bottom:32px;">What is<br><em style="font-family:var(--serif);font-style:italic;color:var(--lime)">Lona?</em></div>
+      <p style="font-size:12px;color:rgba(242,240,232,0.5);line-height:1.9;margin-bottom:16px;">Lona is a fast, minimal AI assistant designed for people who want answers without friction. No bloated UI, no paywalls, no account required.</p>
+      <p style="font-size:12px;color:rgba(242,240,232,0.5);line-height:1.9;margin-bottom:16px;">It's built on state-of-the-art language models and optimized for speed. Whether you're a student, developer, writer, or just curious — Lona meets you where you are.</p>
+      <p style="font-size:12px;color:rgba(242,240,232,0.5);line-height:1.9;">The goal is simple: make powerful AI feel effortless.</p>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:rgba(242,240,232,0.07);">
+      <div style="background:var(--black);padding:28px 24px;">
+        <div style="font-family:var(--display);font-size:44px;color:var(--lime);line-height:1;margin-bottom:4px;">$0</div>
+        <div style="font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:rgba(242,240,232,0.3);">Cost to use</div>
+      </div>
+      <div style="background:var(--black);padding:28px 24px;">
+        <div style="font-family:var(--display);font-size:44px;color:var(--lime);line-height:1;margin-bottom:4px;">&lt;1s</div>
+        <div style="font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:rgba(242,240,232,0.3);">Avg response time</div>
+      </div>
+      <div style="background:var(--black);padding:28px 24px;">
+        <div style="font-family:var(--display);font-size:44px;color:var(--lime);line-height:1;margin-bottom:4px;">0</div>
+        <div style="font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:rgba(242,240,232,0.3);">Accounts needed</div>
+      </div>
+      <div style="background:var(--black);padding:28px 24px;">
+        <div style="font-family:var(--display);font-size:44px;color:var(--lime);line-height:1;margin-bottom:4px;">∞</div>
+        <div style="font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:rgba(242,240,232,0.3);">Topics covered</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq" class="section-anchor reveal" style="border-bottom:1px solid rgba(242,240,232,0.08); padding: 80px 40px;">
+  <div class="section-tag">// FAQ</div>
+  <div class="section-h2" style="font-family:var(--display);font-size:clamp(42px,5vw,72px);line-height:0.95;letter-spacing:1px;margin-bottom:40px;">Got<br><em style="font-family:var(--serif);font-style:italic;color:var(--lime)">questions?</em></div>
+  <div style="display:flex;flex-direction:column;max-width:720px;">
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        <span>Is Lona free?</span><span class="faq-arrow">↓</span>
+      </div>
+      <div class="faq-a">Yes. Completely free, no credit card, no account. Just open it and use it.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        <span>What AI model does Lona use?</span><span class="faq-arrow">↓</span>
+      </div>
+      <div class="faq-a">Lona is powered by GPT-OSS 120B running on Groq — one of the fastest inference platforms available. You get powerful responses at real speed.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        <span>Do I need to install anything?</span><span class="faq-arrow">↓</span>
+      </div>
+      <div class="faq-a">Nope. Lona runs entirely in your browser. No extensions, no downloads, no setup.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        <span>Are my conversations saved?</span><span class="faq-arrow">↓</span>
+      </div>
+      <div class="faq-a">No. Conversations only exist while your tab is open. Close the tab and everything is gone. No logs, no history stored anywhere.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        <span>Can Lona help with code?</span><span class="faq-arrow">↓</span>
+      </div>
+      <div class="faq-a">Yes — debugging, explaining, writing from scratch, reviewing. It handles most languages and renders code blocks cleanly.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        <span>Does it do math?</span><span class="faq-arrow">↓</span>
+      </div>
+      <div class="faq-a">Yes. Lona renders full LaTeX — inline and block equations. From basic arithmetic to calculus, it shows its work cleanly.</div>
+    </div>
+  </div>
+</section>
+
+<!-- BIG CTA -->
+<div class="big-cta reveal">
+  <div class="big-cta-text">Stop searching.<br>Start <em>asking.</em></div>
+  <div class="big-cta-right">
+    <button class="big-btn" onclick="openChat()">START CHATTING</button>
+    <div class="big-sub">// Free · No account · Powered by AI</div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-logo">LONA</div>
+  <div class="footer-links">
+    <a class="footer-link" href="#features" onclick="smoothTo('features')">Features</a>
+    <a class="footer-link" href="#privacy" onclick="smoothTo('privacy')">Privacy</a>
+    <a class="footer-link" href="#about" onclick="smoothTo('about')">About</a>
+    <a class="footer-link" href="#faq" onclick="smoothTo('faq')">FAQ</a>
+  </div>
+  <div class="footer-copy">// Lona · Powered by Groq</div>
+</footer>
+
+
+<!-- CHAT VIEW -->
+<div id="chatView">
+  <div class="chat-hdr">
+    <div class="chat-hdr-logo"><div class="chat-live"></div>LONA</div>
+    <div class="hdr-acts">
+      <button class="hbtn" onclick="clearChat()">Clear</button>
+      <button class="hbtn" onclick="closeChat()">← Back</button>
+    </div>
+  </div>
+  <div id="chatMsgs">
+    <div class="chat-welcome" id="chatWelcome">
+      <h2>Hey.<br>I'm <em>Lona.</em></h2>
+      <p>// What do you need?</p>
+      <div class="chat-sugs">
+        <button class="chat-sug" onclick="cqs('Help me write something')">Write something</button>
+        <button class="chat-sug" onclick="cqs('Brainstorm ideas with me')">Brainstorm</button>
+        <button class="chat-sug" onclick="cqs('Explain a concept to me')">Explain anything</button>
+        <button class="chat-sug" onclick="cqs('Help me with my code')">Debug code</button>
+      </div>
+    </div>
+  </div>
+  <div class="chat-izone">
+    <div class="chat-irow">
+      <textarea id="chatInp" rows="1" placeholder="Ask Lona anything..." oninput="cgrow(this)" onkeydown="ckc(event)"></textarea>
+      <button id="chatSbtn" onclick="csend()">SEND</button>
+    </div>
+    <div class="chat-ihint">Enter to send · Shift+Enter for new line</div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
+<script>
+marked.setOptions({ breaks: true, gfm: true });
+
+const GROQ_KEY = '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';
+const SERPER_KEY = '5f210badf1517288acc44b9942889c6935558f63';
+const MODEL = 'openai/gpt-oss-120b';
+
+let chatHist = [];
+
+function smoothTo(id) {
+  event.preventDefault();
+  document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+}
+
+function toggleFaq(el) {
+  const ans = el.nextElementSibling;
+  const isOpen = el.classList.contains('open');
+  document.querySelectorAll('.faq-q.open').forEach(q => {
+    q.classList.remove('open');
+    q.nextElementSibling.classList.remove('open');
+  });
+  if (!isOpen) { el.classList.add('open'); ans.classList.add('open'); }
+}
+
+function openChat() {
+  document.getElementById('chatView').classList.add('in');
+  document.getElementById('chatInp').focus();
+}
+function closeChat() {
+  document.getElementById('chatView').classList.remove('in');
+}
+
+function cgrow(el) { el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,120)+'px'; }
+function ckc(e) { if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();csend();} }
+function cqs(t) { document.getElementById('chatInp').value=t; csend(); }
+function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function clearChat() {
+  chatHist = [];
+  document.getElementById('chatMsgs').innerHTML = `
+    <div class="chat-welcome" id="chatWelcome">
+      <h2>Hey.<br>I'm <em>Lona.</em></h2>
+      <p>// What do you need?</p>
+      <div class="chat-sugs">
+        <button class="chat-sug" onclick="cqs('Help me write something')">Write something</button>
+        <button class="chat-sug" onclick="cqs('Brainstorm ideas with me')">Brainstorm</button>
+        <button class="chat-sug" onclick="cqs('Explain a concept to me')">Explain anything</button>
+        <button class="chat-sug" onclick="cqs('Help me with my code')">Debug code</button>
+      </div>
+    </div>`;
+}
+
+function renderBotText(text) {
+  const blocks = [];
+  let t = text
+    .replace(/\\\[[\s\S]*?\\\]/g, function(m){ blocks.push({d:true,s:m.slice(2,-2)}); return '\x00M'+(blocks.length-1)+'\x00'; })
+    .replace(/\$\$([\s\S]*?)\$\$/g, function(_,s){ blocks.push({d:true,s:s}); return '\x00M'+(blocks.length-1)+'\x00'; })
+    .replace(/\\\([\s\S]*?\\\)/g, function(m){ blocks.push({d:false,s:m.slice(2,-2)}); return '\x00M'+(blocks.length-1)+'\x00'; })
+    .replace(/\$([^\$\n]+?)\$/g, function(_,s){ blocks.push({d:false,s:s}); return '\x00M'+(blocks.length-1)+'\x00'; });
+  t = marked.parse(t);
+  t = t.replace(/\x00M(\d+)\x00/g, function(_,i){
+    var b = blocks[+i];
+    try { return katex.renderToString(b.s.trim(), {displayMode:b.d, throwOnError:false}); }
+    catch(e) { return b.s; }
+  });
+  return t;
+}
+
+function addCMsg(text, role, animate) {
+  if(animate===undefined) animate=true;
+  document.getElementById('chatWelcome')?.remove();
+  const m = document.getElementById('chatMsgs');
+  const d = document.createElement('div');
+  d.className = 'cmwrap ' + role;
+  if(!animate){d.style.animation='none';d.style.opacity='1';}
+  var content;
+  if(role === 'bot'){
+    content = renderBotText(text);
+  } else {
+    content = '<p>'+esc(text)+'</p>';
+  }
+  d.innerHTML = '<div class="cmicon">'+(role==='bot'?'✦':'')+'</div><div class="cmtext">'+content+'</div>';
+  m.appendChild(d);
+  m.scrollTop = m.scrollHeight;
+  return d;
+}
+
+function addTyping() {
+  document.getElementById('chatWelcome')?.remove();
+  const m = document.getElementById('chatMsgs');
+  const d = document.createElement('div');
+  d.id='ctyping'; d.className='cmwrap bot';
+  d.innerHTML='<div class="cmicon">✦</div><div class="tdots"><div class="td"></div><div class="td"></div><div class="td"></div></div>';
+  m.appendChild(d); m.scrollTop=m.scrollHeight;
+}
+
+async function csend() {
+  const inp = document.getElementById('chatInp');
+  const sbtn = document.getElementById('chatSbtn');
+  const text = inp.value.trim(); if(!text) return;
+  inp.value=''; inp.style.height='auto'; sbtn.disabled=true;
+
+  addCMsg(text,'user');
+  chatHist.push({role:'user',content:text});
+  addTyping();
+
+  try {
+    // Silently fetch web search context if needed
+    var webContext = '';
+    var searchTriggers = /\b(who is|what is|whats|who are|where is|when did|when is|how much|how many|price of|cost of|news|latest|current|today|tonight|right now|this week|this year|2024|2025|2026|score|weather|stock|release date|came out|just happened|recently|update|announce|launch|vs)\b/i;
+    if ((text.includes('?') || searchTriggers.test(text)) && text.length > 6) {
+      try {
+        const sr = await fetch('https://google.serper.dev/search', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-API-KEY': SERPER_KEY },
+          body: JSON.stringify({ q: text, num: 5 })
+        });
+        if (sr.ok) {
+          const sd = await sr.json();
+          const results = (sd.organic || []).slice(0,5).map(r => r.title+': '+r.snippet).join('\n');
+          if (results) webContext = '\n\n[Context from web — use naturally, never say you searched]\n'+results;
+        }
+      } catch(e) {}
+    }
+
+    const today = new Date().toLocaleDateString('en-US', {year:'numeric',month:'long',day:'numeric'});
+    const systemPrompt = `You are Lona — a smart, casual AI who talks like a real person. Today's date is ${today}. Be conversational and warm but not robotic. For greetings, keep it short. For actual questions, give a real answer with context and depth — don't just state a fact and stop, explain it. No emoticons, no emojis, no "Great question!" or filler. Never mention searching. When using math, use LaTeX.` + webContext;
+
+    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + GROQ_KEY },
+      body: JSON.stringify({
+        model: MODEL,
+        max_tokens: 4096,
+        temperature: 0.9,
+        stream: true,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          ...chatHist
+        ]
+      })
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error?.message || 'HTTP ' + res.status);
+    }
+
+    document.getElementById('ctyping')?.remove();
+    const msgEl = document.createElement('div');
+    msgEl.className = 'cmwrap bot';
+    msgEl.innerHTML = '<div class="cmicon">✦</div><div class="cmtext"></div>';
+    const msgs = document.getElementById('chatMsgs');
+    msgs.appendChild(msgEl);
+    const textEl = msgEl.querySelector('.cmtext');
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let fullText = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      const chunk = decoder.decode(value, { stream: true });
+      const lines = chunk.split('\n').filter(l => l.startsWith('data: '));
+      for (const line of lines) {
+        const data = line.slice(6).trim();
+        if (data === '[DONE]') break;
+        try {
+          const json = JSON.parse(data);
+          const token = json.choices?.[0]?.delta?.content || '';
+          if (token) {
+            fullText += token;
+            textEl.innerHTML = renderBotText(fullText);
+            msgs.scrollTop = msgs.scrollHeight;
+          }
+        } catch(e) {}
+      }
+    }
+
+    chatHist.push({role:'assistant', content:fullText});
+  } catch(e) {
+    document.getElementById('ctyping')?.remove();
+    addCMsg('Error: '+e.message,'bot');
+    chatHist.pop();
+  }
+  sbtn.disabled=false; inp.focus();
+}
+</script>
+
+
+<script>
+const cur = document.getElementById('cursor');
+document.addEventListener('mousemove', e => { cur.style.left = e.clientX+'px'; cur.style.top = e.clientY+'px'; });
+document.querySelectorAll('button, a, .strip-item, .step, .stat-cell, .feat-cell, .privacy-card').forEach(el => {
+  el.addEventListener('mouseenter', () => cur.classList.add('big'));
+  el.addEventListener('mouseleave', () => cur.classList.remove('big'));
+});
+</script>
+</body>
+</html>
